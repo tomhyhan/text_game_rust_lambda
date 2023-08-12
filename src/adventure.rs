@@ -2,26 +2,6 @@ use std::collections::VecDeque;
 
 use crate::int_program::ProgramASCII;
 
-
-
-// fn find_password() {
-    // auto : "north\ntake sand\nnorth\nnorth\ntake astrolabe\nsouth\nsouth\nwest\nwest\ntake mutex\neast\neast\nsouth\neast\ntake klein bottle\neast\ntake semiconductor\nwest\nnorth\nnorth\nnorth\ntake dehydrated water\nsouth\nsouth\nsouth\nwest\nwest\nnorth\ntake shell\nsouth\nsouth\nwest\ntake ornament\nwest\nsouth\n".to_string()
-    // let items = vec!["mutex", "ornament", "sand", "astrolabe", "klein bottle", "semiconductor", "dehydrated water", "shell"];
-    // for item in items.iter() {
-    //     add_command_to_program(&mut program_acsii, "drop ", item)
-    // }
-    // let command_sets = generate_powerset(items);
-    // for commands in command_sets.iter() {
-    //     for command in commands.iter() {
-    //         add_command_to_program(&mut program_acsii, "take ", command)
-    //     }    
-    //     add_command_to_program(&mut program_acsii, "", "south");
-    //     for command in commands.iter() {
-    //         add_command_to_program(&mut program_acsii, "drop ", command)
-    //     }  
-    // }
-// }
-
 fn add_command_to_program(program: &mut ProgramASCII, command:&str, item: &str)  {
     let s  = format!("{}{}",command, item);
     let mut str_chars:VecDeque<char> = s.trim_end().chars().collect();
@@ -43,8 +23,14 @@ pub fn advanture(commands: Vec<String>)-> Vec<String> {
         if c == '\n' {
             if !msg.is_empty() {
                 text_help.push(msg.clone());
-                msg.clear();
             } 
+            if msg.contains("take the infinite loop") {
+                break
+            }
+            if msg.contains("giant electromagnet is stuck to you") {
+                break
+            }
+            msg.clear();
         } else {
             msg.push(c);
         }
@@ -53,5 +39,26 @@ pub fn advanture(commands: Vec<String>)-> Vec<String> {
     if text.len() < 2 {
         return text_help;
     }
-    text_help[text[text.len()-2].0+1..=text[text.len()-1].0].to_vec()
+    let mut last_msg = text_help[text[text.len()-2].0+1..=text[text.len()-1].0].to_vec();
+
+    let game_ends = [
+        "take the infinite loop",
+        "take the escape pod",
+        "giant electromagnet is stuck to you",
+        "take the photons",
+        "take the molten lava",
+        "You may proceed",
+    ];
+
+    let end_condition = game_ends.iter().any(|msg| {
+        text_help.join("").contains(&msg.to_string())
+    });
+
+    if end_condition {
+        last_msg = text_help[text[text.len()-1].0+1..].to_vec();
+        last_msg.push("Try Again!".to_string());
+        last_msg
+    } else {
+        last_msg
+    }
 }
